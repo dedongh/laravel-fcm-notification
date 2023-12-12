@@ -1,5 +1,5 @@
 {
-  "name": "zylo/laravel-fcm-notification",
+  "name": "zylu/laravel-fcm-notification",
   "description": "Laravel FCM (Firebase Cloud Messaging) Notification Channel",
   "license": "MIT",
   "keywords": [
