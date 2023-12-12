@@ -1,5 +1,5 @@
 {
-  "name": "benwilkins/laravel-fcm-notification",
+  "name": "zylo/laravel-fcm-notification",
   "description": "Laravel FCM (Firebase Cloud Messaging) Notification Channel",
   "license": "MIT",
   "keywords": [
@@ -10,17 +10,17 @@
   ],
   "authors": [
     {
-      "name": "Ben Wilkins",
-      "email": "bentwilkins@gmail.com"
+      "name": "Dhruvit Salat",
+      "email": "salatd0852@gmail.com"
     }
   ],
   "require": {
     "php": ">=5.6.4",
     "guzzlehttp/guzzle": "^6.2|^7.0",
-    "illuminate/notifications": "~5.3|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/queue": "~5.3|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/support": "~5.3|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/config": "~5.3|^6.0|^7.0|^8.0|^9.0"
+     "illuminate/notifications": "~5.3|^6.0|^7.0|^8.0|^9.0|^10.0",
+    "illuminate/queue": "~5.3|^6.0|^7.0|^8.0|^9.0|^10.0",
+    "illuminate/support": "~5.3|^6.0|^7.0|^8.0|^9.0|^10.0",
+    "illuminate/config": "~5.3|^6.0|^7.0|^8.0|^9.0|^10.0"
   },
   "require-dev": {
     "mockery/mockery": "~1.0",
