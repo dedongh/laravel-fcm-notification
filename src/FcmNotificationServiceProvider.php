@@ -23,8 +23,8 @@ class FcmNotificationServiceProvider extends ServiceProvider
                 // Pass the service account JSON and project ID to the TokenManager and FcmChannel
                 return new FcmChannel(
                     app(Client::class),
-                    new TokenManager(config('services.fcm.service_account')),
-                    config('services.fcm.project_id')
+                    new TokenManager(config('services.firebase.service_account')),
+                    config('services.firebase.project_id')
                 );
             });
         });
