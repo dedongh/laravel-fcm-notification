@@ -19,7 +19,13 @@ class FcmNotificationServiceProvider extends ServiceProvider
     {
         Notification::resolved(function (ChannelManager $service) {
             $service->extend('fcm', function () {
-                return new FcmChannel(app(Client::class), config('services.fcm.key'));
+                
+                // Pass the service account JSON and project ID to the TokenManager and FcmChannel
+                return new FcmChannel(
+                    app(Client::class),
+                    new TokenManager(config('services.fcm.service_account')),
+                    config('services.fcm.project_id')
+                );
             });
         });
     }

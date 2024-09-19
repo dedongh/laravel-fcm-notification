@@ -53,9 +53,9 @@ class FcmMessage
     private $timeToLive;
 
     /**
-     * @var bool
+     * @var string
      */
-    private $dryRun;
+    private $clickAction;
 
     /**
      * @var string
@@ -75,7 +75,7 @@ class FcmMessage
     public function to($recipient, $recipientIsTopic = false)
     {
         if ($recipientIsTopic && is_string($recipient)) {
-            $this->to = '/topics/'.$recipient;
+            $this->to = '/topics/' . $recipient;
         } elseif (is_array($recipient) && count($recipient) == 1) {
             $this->to = $recipient[0];
         } else {
@@ -222,21 +222,14 @@ class FcmMessage
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isDryRun()
-    {
-        return $this->dryRun;
-    }
 
     /**
-     * @param bool $dryRun
+     * @param int $clickAction
      * @return $this
      */
-    public function dryRun($dryRun)
+    public function clickAction($clickAction)
     {
-        $this->dryRun = $dryRun;
+        $this->clickAction = $clickAction;
 
         return $this;
     }
@@ -260,58 +253,48 @@ class FcmMessage
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function formatData()
     {
         $payload = [
-            'priority' => $this->priority,
+            'message' => [
+                'token' => $this->to,
+                'notification' => $this->notification,
+                'android' => [
+                    'priority' => $this->priority // Maintain the priority set in the message
+                ],
+                'data' => $this->data
+            ]
         ];
 
-        if (is_array($this->to)) {
-            $payload['registration_ids'] = $this->to;
-        } elseif (! empty($this->to)) {
-            $payload['to'] = $this->to;
-        }
-
-        if (isset($this->data) && count($this->data)) {
-            $payload['data'] = $this->data;
-        }
-
-        if (isset($this->notification) && count($this->notification)) {
-            $payload['notification'] = $this->notification;
-        }
-
-        if (isset($this->condition) && ! empty($this->condition)) {
-            $payload['condition'] = $this->condition;
-        }
-
-        if (isset($this->collapseKey) && ! empty($this->collapseKey)) {
-            $payload['collapse_key'] = $this->collapseKey;
+        if (!empty($this->collapseKey)) {
+            $payload['message']['collapse_key'] = $this->collapseKey;
         }
 
         if (isset($this->contentAvailable)) {
-            $payload['content_available'] = $this->contentAvailable;
+            $payload['message']['apns'] = ['payload' => ['aps' => ['content-available' => 1]]];
         }
 
         if (isset($this->mutableContent)) {
-            $payload['mutable_content'] = $this->mutableContent;
+            $payload['message']['apns']['payload']['aps']['mutable-content'] = 1;
+        }
+
+        if (!empty($this->condition)) {
+            $payload['message']['condition'] = $this->condition;
         }
 
         if (isset($this->timeToLive)) {
-            $payload['time_to_live'] = $this->timeToLive;
+            $payload['message']['android'] = ['ttl' => $this->timeToLive . 's'];
         }
 
-        if (isset($this->dryRun)) {
-            $payload['dry_run'] = $this->dryRun;
+        if (isset($this->clickAction)) {
+            $payload['message']['android']['notification']['click_action'] = $this->clickAction;
         }
 
-        if (isset($this->packageName) && ! empty($this->packageName)) {
-            $payload['restricted_package_name'] = $this->packageName;
+        if (!empty($this->packageName)) {
+            $payload['message']['android']['restricted_package_name'] = $this->packageName;
         }
 
-        return \GuzzleHttp\json_encode($payload);
+        return json_encode($payload);
     }
 
     /**

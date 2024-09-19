@@ -4,6 +4,7 @@ namespace Benwilkins\FCM;
 
 use GuzzleHttp\Client;
 use Illuminate\Notifications\Notification;
+use Benwilkins\FCM\TokenManager;
 
 /**
  * Class FcmChannel.
@@ -11,32 +12,39 @@ use Illuminate\Notifications\Notification;
 class FcmChannel
 {
     /**
-     * @const The API URL for Firebase
-     */
-    const API_URI = 'https://fcm.googleapis.com/fcm/send';
-
-    /**
      * @var Client
      */
     private $client;
 
     /**
-     * @var string
+     * @var TokenManager
      */
-    private $apiKey;
+    private $tokenManager;
 
     /**
-     * @param  Client  $client
+     * @var string
      */
-    public function __construct(Client $client, $apiKey)
+    private $projectId;
+
+    /**
+     * FcmChannel constructor.
+     *
+     * @param Client $client
+     * @param TokenManager $tokenManager
+     * @param string $projectId The Firebase project ID.
+     */
+    public function __construct(Client $client, TokenManager $tokenManager, string $projectId)
     {
         $this->client = $client;
-        $this->apiKey = $apiKey;
+        $this->tokenManager = $tokenManager;
+        $this->projectId = $projectId;
     }
 
     /**
-     * @param  mixed  $notifiable
-     * @param  Notification  $notification
+     * Send the notification.
+     *
+     * @param mixed $notifiable
+     * @param Notification $notification
      * @return mixed
      */
     public function send($notifiable, Notification $notification)
@@ -52,7 +60,13 @@ class FcmChannel
             $message->to($to);
         }
 
-        $response_array = [];
+        $responseArray = [];
+
+        // Get the OAuth 2.0 token from the TokenManager
+        $accessToken = $this->tokenManager->getAccessToken();
+
+        // Build the FCM URL dynamically with the provided project ID
+        $apiUrl = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 
         if (is_array($message->getTo())) {
             $chunks = array_chunk($message->getTo(), 1000);
@@ -60,28 +74,28 @@ class FcmChannel
             foreach ($chunks as $chunk) {
                 $message->to($chunk);
 
-                $response = $this->client->post(self::API_URI, [
+                $response = $this->client->post($apiUrl, [
                     'headers' => [
-                        'Authorization' => 'key='.$this->apiKey,
+                        'Authorization' => 'Bearer ' . $accessToken,
                         'Content-Type'  => 'application/json',
                     ],
                     'body' => $message->formatData(),
                 ]);
 
-                array_push($response_array, \GuzzleHttp\json_decode($response->getBody(), true));
+                array_push($responseArray, json_decode($response->getBody(), true));
             }
         } else {
-            $response = $this->client->post(self::API_URI, [
+            $response = $this->client->post($apiUrl, [
                 'headers' => [
-                    'Authorization' => 'key='.$this->apiKey,
-                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type'  => 'application/json',
                 ],
                 'body' => $message->formatData(),
             ]);
 
-            array_push($response_array, \GuzzleHttp\json_decode($response->getBody(), true));
+            array_push($responseArray, json_decode($response->getBody(), true));
         }
 
-        return $response_array;
+        return $responseArray;
     }
 }
