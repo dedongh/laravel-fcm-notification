@@ -68,12 +68,24 @@ class FcmChannel
         // Build the FCM URL dynamically with the provided project ID
         $apiUrl = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 
-        if (is_array($message->getTo())) {
-            $chunks = array_chunk($message->getTo(), 1000);
+        try {
+            if (is_array($message->getTo())) {
+                $chunks = array_chunk($message->getTo(), 1000);
 
-            foreach ($chunks as $chunk) {
-                $message->to($chunk);
+                foreach ($chunks as $chunk) {
+                    $message->to($chunk);
 
+                    $response = $this->client->post($apiUrl, [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $accessToken,
+                            'Content-Type'  => 'application/json',
+                        ],
+                        'body' => $message->formatData(),
+                    ]);
+
+                    array_push($responseArray, json_decode($response->getBody(), true));
+                }
+            } else {
                 $response = $this->client->post($apiUrl, [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $accessToken,
@@ -84,16 +96,8 @@ class FcmChannel
 
                 array_push($responseArray, json_decode($response->getBody(), true));
             }
-        } else {
-            $response = $this->client->post($apiUrl, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $accessToken,
-                    'Content-Type'  => 'application/json',
-                ],
-                'body' => $message->formatData(),
-            ]);
-
-            array_push($responseArray, json_decode($response->getBody(), true));
+        } catch (\Exception $e) {
+            array_push($responseArray, ['error' => $e->getMessage()]);
         }
 
         return $responseArray;
