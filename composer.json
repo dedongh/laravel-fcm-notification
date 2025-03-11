@@ -1,5 +1,5 @@
 {
-  "name": "zylu/laravel-fcm-notification",
+  "name": "dedongh/laravel-fcm-notification",
   "description": "Laravel FCM (Firebase Cloud Messaging) Notification Channel",
   "license": "MIT",
   "keywords": [
@@ -10,8 +10,8 @@
   ],
   "authors": [
     {
-      "name": "Dhruvit Salat",
-      "email": "salatd0852@gmail.com"
+      "name": "Emmanuel Owusu",
+      "email": "asiamahemma95@gmail.com"
     }
   ],
   "require": {
